@@ -39,12 +39,16 @@ impl LogicElement for Operator {
     }
 }
 
+#[derive(Copy, Clone)]
 struct Variable {
     symbol: char,
 }
 impl Variable {
     fn new(symbol: char) -> Self {
         Self { symbol }
+    }
+    fn wff(&self) -> Wff {
+        Wff::new_variable(*self)
     }
 }
 impl Arity for Variable {}
@@ -83,6 +87,13 @@ impl Wff {
             .map(|element| element.symbol())
             .collect::<String>()
     }
+    fn pn(&self) -> String {
+        self.formula
+            .iter()
+            .map(|element| element.symbol())
+            .rev()
+            .collect::<String>()
+    }
 }
 impl Arity for Wff {}
 impl LogicElement for Wff {
@@ -94,17 +105,16 @@ impl LogicElement for Wff {
 fn main() {
     let or = Operator::or();
     let imp = Operator::imp();
-    let a = Variable::new('A');
-    let b = Variable::new('B');
-    let b_wff = Wff::new_variable(b);
-    let c = Variable::new('C');
-    let c_wff = Wff::new_variable(c);
+    let a = Variable::new('A').wff();
+    let b = Variable::new('B').wff();
+    let c = Variable::new('C').wff();
 
-    let mut disj = Wff::new_variable(a);
-    disj.add_2arity(or, b_wff);
+    let mut disj = Wff::new(a);
+    disj.add_2arity(or, b);
 
     let mut impli = Wff::new(disj);
-    impli.add_2arity(imp, c_wff);
+    impli.add_2arity(imp, c);
 
-    println!("Formula: {}", impli.rpn());
+    println!("Formula in polish notation: {}", impli.pn());
+    println!("Formula in reverse polish notation: {}", impli.rpn());
 }
